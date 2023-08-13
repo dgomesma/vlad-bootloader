@@ -21,3 +21,4 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 echo "Bootable device attached to loopback device ${LOOPBACK_DEV}"
+## TODO: Possibly unfinished.
