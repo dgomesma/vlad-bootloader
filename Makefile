@@ -1,14 +1,17 @@
 BOOT=boot
 ASM=nasm
+OBJCOPY=objcopy
 
-SRC=$(BOOT).s
-BIN=$(BOOT).bin
+all: hello-vlad
 
-all: $(BIN)
+hello-vlad: bin/hello-vlad.bin
 
-$(BIN):
-	$(ASM) $(SRC) -f bin -o $@
+bin/%.bin: build/%.elf
+	$(OBJCOPY) -O binary $< $@ 
+
+build/%.elf: src/%.s
+	$(ASM) $< -f elf -g -o $@
 
 .PHONY: clean
 clean:
-	rm $(BIN)
+	rm -f build/* bin/*
