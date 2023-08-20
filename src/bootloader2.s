@@ -19,7 +19,7 @@ print:
 	cld
 
 print_loop:
-	lodsbs
+	lodsb
 	or al, al
 	jz hang
 	mov bh, 0x0
