@@ -4,13 +4,16 @@ OBJCOPY=objcopy
 
 all: hello-vlad
 
-hello-vlad: bin/hello-vlad.bin
+.PHONY: test
 
-bin/%.bin: build/%.elf
-	$(OBJCOPY) -O binary $< $@ 
+hello-vlad: img/hello-vlad.img
 
-build/%.elf: src/%.s
-	$(ASM) $< -f elf -g -o $@
+img/hello-vlad.img: build/hello-vlad.bin
+	scripts/create-disk.sh $@
+	dd if=$< of=$@ bs=512 count=1 conv=notrunc
+
+build/%.bin: src/%.s
+	$(ASM) -f binary -o $< $@ 
 
 .PHONY: clean
 clean:
