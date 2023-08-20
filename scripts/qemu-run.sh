@@ -39,8 +39,8 @@ done
 check_programs
 
 FLAGS="--display ${DISPLAY} "
-if [[ ${DEBUG} -eq 1 ]]; then
-  FLAGS+=" -s -S"
+if [[ ${DEBUG} == "true" ]]; then
+  FLAGS+=" -s -S "
 fi
 
 assert_file_exists ${IMG}
