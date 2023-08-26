@@ -1,64 +1,67 @@
-[ORG 0x7c00]
-[BITS 16]
-	; Interrupts
-	VIDEO_INT		EQU 0x10
-	VIDEO_WCHAR_FN		EQU 0x0e
-	
-	DISK_INT		EQU 0x13
-	DISK_RESET_FN		EQU 0x00
-	DISK_READ_FN		EQU 0x02
+.code16
+.org 0x7c00
 
-	; Memory Layout
-	BOOTLD2_BASE_ADDR	EQU 0x07e0
+	VIDEO_INT = $0x10
+	VIDEO_WCHAR_FN = $0x0e
 
-	; Disk Layout
-	BOOTLD2_SECTOR		EQU 0x2
+	DISK_INT = $0x13
+	DISK_RESET_FN = $0x00
+	DISK_READ_FN = $0x02
+
+	BOOTLD2_ADDR = $0x7e00
+	BOOTLD2_SECTOR = $0x2
+
+.section .text
+.globl initialize_segments
 
 initialize_segments:
-	mov ax, 0x0
-	mov ds, ax
+	movw $0x0, %ax
+	movw %ax, %ds
 
 initialize_disk:
-	mov ah, DISK_RESET_FN
-	mov dl, 0
-	int 0x13
-
-; Contents read are buffered into [es:bx]
-read:
-	mov ax, 0
-	mov bx, ax
-	mov ax, BOOTLD2_BASE_ADDR
-	mov es, ax
-	mov ah, DISK_READ_FN		; Function code
-	mov al, 0x1			; Number of sectors
-	mov ch, 0x0			; Track number
-	mov cl, 0x2			; Sector number	
-	mov dh, 0x0			; Disk side number
-	mov dl, 0x0			; Drive Number (Floppy disk is 0x0)
-	int DISK_INT
+	movb $DISK_RESET_FN, %ah
+	movb $0x0, %dl
+	int $DISK_INT
+			
+# Contents read are buffered into [es:bx]
+read_bootloader:
+	# Set [es:bx]
+	movw $0x0, %ax
+	movw %ax, %es
+	movw $BOOTLD2_BASE_ADDR, %ax
+	movw %ax, %bx
+	
+	# Set interrupt
+	movb $DISK_READ_FN, %ah
+	movb $0x1, %al
+	movb $0x0, %ch
+	movb $0x2, %cl
+	movb $0x0, %dh
+	movb $0x0, %dl
+	int $DISK_INT
 	jc reading_error
-	jmp BOOTLD2_BASE_ADDR:0x0
+	ljmp $BOOTLD2_BASE_ADDR, $0x0
 
 reading_error:
-	mov si, error_msg
+	movw $error_msg, %si
 	cld
 
 print_error:
 	lodsb
-	or al, al
+	or %al, %al
 	jz hang
-	mov bh, 0x0		; Video page
-	mov ah, VIDEO_WCHAR_FN
-	int VIDEO_INT
+	movb $0x0, %bh
+	movb $VIDEO_WCHAR_FN, %ah
+	int $VIDEO_INT
 	jmp print_error
 
 hang:
 	jmp hang
 
 error_msg:
-	db 'Error reading from disk', 13, 10, 0
-	
+	.asciz "Error reading from disk!"
+
 signature:
-	times 510-($-$$) db 0
-	db 0x55
-	db 0xaa
+	.fill 510 - (. - initialize_segments), 1, 0
+	.byte 0x55
+	.byte 0xaa
