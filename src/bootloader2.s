@@ -1,34 +1,31 @@
-[ORG 0x7e00]
-[BITS 16]
+.org 0x7e00
+.code16
 
-	; Interrupts
-	VIDEO_INT		EQU 0x10
-	VIDEO_WCHAR_FN		EQU 0x0e
-	
-	DISK_INT		EQU 0x13
-	DISK_RESET_FN		EQU 0x00
-	DISK_READ_FN		EQU 0x02
+	VIDEO_INT = $0x10
+	VIDEO_WCHAR_FN = $0x0e
 
-	; Memory Layout
-	BOOTLD2_BASE_ADDR	EQU 0x7e00
+	DISK_INT = $0x13
+	DISK_RESET_FN = $0x00
+	DISK_READ_FN = $0x02
 
-print:
-	mov ax, 0x0
-	mov ds, ax
-	mov si, success_msg
+.section .text
+.globl print
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw success_msg, %si
 	cld
 
 print_loop:
 	lodsb
-	or al, al
+	or %al, %al
 	jz hang
-	mov bh, 0x0
-	mov ah, VIDEO_WCHAR_FN
-	int VIDEO_INT
+	movw $0x0, %bh
+	movw $VIDEO_WCHAR_FN, %ah
+	int $VIDEO_INT
 	jmp print_loop
 
 hang:
 	jmp hang
 
 success_msg:
-	db 'Success!!', 13, 10, 0
+	.asciz "Success!!"	
