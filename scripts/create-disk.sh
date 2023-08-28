@@ -25,7 +25,7 @@ check_programs() {
 assert_nargs $# 1
 
 while [[ "$#" -gt 0 ]]; do
-  DISK_NAME=$1
+  DISK=$1
   case $1 in
     --help) display_help ;;
   esac
