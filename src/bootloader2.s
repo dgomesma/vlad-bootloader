@@ -11,7 +11,7 @@
 .globl print
 	movw $0x0, %ax
 	movw %ax, %ds
-	movw success_msg, %si
+	movw $success_msg, %si
 	cld
 
 print_loop:
