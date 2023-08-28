@@ -1,15 +1,14 @@
 .code16
-.org 0x7c00
 
-	VIDEO_INT = $0x10
-	VIDEO_WCHAR_FN = $0x0e
+	VIDEO_INT = 0x10
+	VIDEO_WCHAR_FN = 0x0e
 
-	DISK_INT = $0x13
-	DISK_RESET_FN = $0x00
-	DISK_READ_FN = $0x02
+	DISK_INT = 0x13
+	DISK_RESET_FN = 0x00
+	DISK_READ_FN = 0x02
 
-	BOOTLD2_ADDR = $0x7e00
-	BOOTLD2_SECTOR = $0x2
+	BOOTLD2_ADDR = 0x7e00
+	BOOTLD2_SECTOR = 0x2
 
 .section .text
 .globl initialize_segments
@@ -28,7 +27,7 @@ read_bootloader:
 	# Set [es:bx]
 	movw $0x0, %ax
 	movw %ax, %es
-	movw $BOOTLD2_BASE_ADDR, %ax
+	movw $BOOTLD2_ADDR, %ax
 	movw %ax, %bx
 	
 	# Set interrupt
@@ -40,7 +39,7 @@ read_bootloader:
 	movb $0x0, %dl
 	int $DISK_INT
 	jc reading_error
-	ljmp $BOOTLD2_BASE_ADDR, $0x0
+	ljmp $0x0, $BOOTLD2_ADDR
 
 reading_error:
 	movw $error_msg, %si
