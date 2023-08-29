@@ -13,6 +13,7 @@
 .section .text
 .globl initialize_segments
 
+start:
 initialize_segments:
 	movw $0x0, %ax
 	movw %ax, %ds
@@ -39,7 +40,16 @@ read_bootloader:
 	movb $0x0, %dl
 	int $DISK_INT
 	jc reading_error
-	ljmp $0x0, $BOOTLD2_ADDR
+
+
+# Stack pointer denoted by [ss:sp]
+set_stack_ptr:
+	movw $0x0, %ax
+	movw %ax, %ss
+	movw $start, %sp	
+
+call_bootloader2:
+	call bootloader2
 
 reading_error:
 	movw $error_msg, %si
