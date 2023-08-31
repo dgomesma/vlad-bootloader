@@ -5,6 +5,10 @@ ARCH=i686-elf
 AS=$(ARCH)-as
 OBJCOPY=$(ARCH)-objcopy
 LD=$(ARCH)-ld
+CC=$(ARCH)-gcc
+
+CFLAGS=-m16 -ffreestanding -mno-red-zone -Iinclude -std=c99 -g
+LFLAGS=-nostdlib -lgcc
 
 all: hello-vlad
 
@@ -24,6 +28,9 @@ img/bootloader.img: bin/bootloader.bin
 
 bin/bootloader.bin: build/bootloader1.o build/bootloader2.o 
 	$(LD) -T ldscripts/bootloader.ld -o $@ $?
+
+build/%.o: src/%.c
+	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $<
 
 build/%.o: src/%.s
 	$(AS) -o $@ $< 
