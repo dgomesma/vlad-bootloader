@@ -10,6 +10,9 @@
 	BOOTLD2_ADDR = 0x7e00
 	BOOTLD2_SECTOR = 0x2
 
+	STACK_SEGMENT = 0x0000 
+	STACK_OFFSET = 0x7c00
+
 .section .text
 .globl initialize_segments
 
@@ -39,6 +42,14 @@ read_bootloader:
 	movb $0x0, %dl
 	int $DISK_INT
 	jc reading_error
+
+prepare_stack:
+	movw $STACK_SEGMENT, %ax
+	movw %ax, %sp
+	movw $STACK_OFFSET, %ax
+	movw %ax, %ss
+
+jmp_to_bootloader2:
 	ljmp $0x0, $BOOTLD2_ADDR
 
 reading_error:
