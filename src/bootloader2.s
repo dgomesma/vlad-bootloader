@@ -31,6 +31,13 @@
 	MEM_MAP_STRUCT_SIZE = 24		
 
 .section .text
+	call detect_mem
+	call print_success
+
+# Arguments:
+#	No arguments.
+# Clobber:
+#	ES, DI, AX, BX, DX, CX
 detect_mem:
 detect_mem_loop_entry:
 	movl $MEM_MAP_BUF_PHYS_ADDR, mem_map_buf  
@@ -70,38 +77,81 @@ detect_mem_loop_update:
 	jmp detect_mem_loop_body
 
 detect_mem_loop_exit:
-	jmp print_success
+	ret
 
+# Arguments:
+#	No arguments
+# Clobber:
+#	AX, BX, DS, SI
 print_error:
+	pushw %bp
+	movw %sp, %bp
+
 	movw $0x0, %ax
 	movw %ax, %ds
 	movw $error_str, %si
-	jmp print
+
+	call print
+
+	popw %bp
+	ret
 	
+# Arguments:
+#	No arguments
+# Clobber:
+#	AX, BX, DS, SI
 print_success:
+	pushw %bp
+	movw %sp, %bp
+
 	movw $0x0, %ax
 	movw %ax, %ds
 	movw $success_str, %si
-	jmp print
 
+	call print
+
+	popw %bp
+	ret
+
+# Arguments:
+#	No arguments
+# Clobber:
+#	AX, BX, DS, SI
 print_end:
+	pushw %bp
+	movw %sp, %bp
+
 	movw $0x0, %ax
 	movw %ax, %ds
 	movw $end_str, %si
-	jmp print
 
-# Make sure to point [ds:si] to the right string before
-# jumping here.
+	call print
+
+	popw %bp
+	ret
+
+# Arguments:
+#	DS - Segment where string is located
+#	SI - Offset where string is located
+# Clobber:
+#	AX, BX
 print:
+	push %bp
+	mov %sp, %bp
+
 print_loop:
 	cld
 	lodsb
 	or %al, %al
-	jz hang
+	jz print_loop_exit 
 	movb $0x0, %bh
 	movb $VIDEO_WCHAR_FN, %ah
 	int $VIDEO_INT
 	jmp print_loop
+
+print_loop_exit:
+	pop %bp
+	ret
 
 hang:
 	jmp hang
