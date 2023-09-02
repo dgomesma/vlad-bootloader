@@ -63,7 +63,7 @@ detect_mem_loop_body:
 
 detect_mem_loop_check:
 	cmpl $SMAP, %eax 
-	jne print_error		# TODO: Implement more informative error message
+	jne detect_mem_abort
 	cmpw $0x0, %bx  
 	je detect_mem_loop_exit 
 
@@ -76,8 +76,45 @@ detect_mem_loop_update:
 	movb $SYS_MEM_MAP_AL, %al
 	jmp detect_mem_loop_body
 
+detect_mem_abort:
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $mem_map_error, %ax
+	movw %ax, %si
+	call abort
+
 detect_mem_loop_exit:
 	ret
+
+# Arguments:
+#	DS - Segment where error string is located
+#	SI - Offset where error string is located
+abort:
+	# Function preamble
+	pushw %bp
+	movw %sp, %bp
+
+	# Store arguments
+	sub $4, %sp
+	movw %ds, -4(%bp)
+	movw %si, -2(%bp)
+
+	# Print error string prefix
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $error_prefix_str, %ax
+	movw %ax, %si
+	call print
+	
+	# Retrieve arguments
+	movw -4(%bp), %ds
+	movw -2(%bp), %si
+	call print
+
+	# Restore stack frame
+	movw %bp, %sp
+	popw %bp
+	jmp hang
 
 # Arguments:
 #	No arguments
@@ -159,10 +196,14 @@ hang:
 .section .data
 end_str:
 	.asciz "End of execution."	
+mem_map_error:
+	.asciz "Error detecting memory."
 success_str:
 	.asciz "Success!"
 error_str:
 	.asciz "Error!"
+error_prefix_str:
+	.asciz "Error: "
 
 .section .bss
 mem_map_buf:
