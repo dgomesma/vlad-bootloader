@@ -31,8 +31,13 @@
 	MEM_MAP_STRUCT_SIZE = 24		
 
 .section .text
+	call print_bootloader2_loaded
 	call detect_mem
 	call print_success
+
+# Arguments
+#	No arguments.
+# Clobber:
 
 # Arguments:
 #	No arguments.
@@ -120,6 +125,23 @@ abort:
 #	No arguments
 # Clobber:
 #	AX, BX, DS, SI
+print_bootloader2_loaded:
+	pushw %bp
+	movw %sp, %bp
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $bootloader2_loaded_str, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %bp
+	ret
+
+# Arguments:
+#	No arguments
+# Clobber:
+#	AX, BX, DS, SI
 print_error:
 	pushw %bp
 	movw %sp, %bp
@@ -194,6 +216,8 @@ hang:
 	jmp hang
 
 .section .data
+bootloader2_loaded_str:
+	.asciz "Bootloader 2 loaded...\n\r"
 end_str:
 	.asciz "End of execution."	
 mem_map_error:
