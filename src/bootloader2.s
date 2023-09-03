@@ -156,11 +156,13 @@ print_bootloader2_loaded:
 
 # Arguments
 #	No arguments
-# Clobber:
-#	AX, BX, DS, SI
 print_mem_detected:
 	pushw %bp
 	movw %sp, %bp
+	pushw %ax
+	pushw %dx
+	pushw %si
+
 	movw $0x0, %ax
 	movw %ax, %ds
 	movw $mem_detected_str, %ax
@@ -168,6 +170,9 @@ print_mem_detected:
 
 	call print
 
+	popw %si
+	popw %dx
+	popw %ax
 	popw %bp
 	ret
 
