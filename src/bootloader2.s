@@ -35,6 +35,17 @@
 	call print_mem_detected
 	call print_testing_a20
 	call test_a20
+	cmpw $0x0, %ax
+	je a20_disabled
+	call print_a20_is_enabled	
+	call print_newline
+	jmp a20_fi
+
+a20_disabled:
+	call print_a20_is_disabled
+	call print_newline
+	
+a20_fi:
 	call print_success
 	jmp hang
 
