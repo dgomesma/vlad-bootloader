@@ -58,7 +58,7 @@ test_a20:
 	# Setup es:di
 	xor %ax, %ax
 	movw %ax, %es
-	movw $0x0500, $di
+	movw $0x0500, %di
 
 	# Setup ds:si
 	not %ax
@@ -76,7 +76,7 @@ test_a20:
 	# Verify if address wraps around
 	movb $0x00, %es:(%di)
 	movb $0xFF, %ds:(%si)
-	cmpb %es:(%di), $0xFF  
+	cmpb $0xFF, %es:(%di)
 
 	# Restore contents at ds:si
 	popw %ax
