@@ -37,6 +37,8 @@
 	call test_a20
 	cmpw $0x0, %ax
 	je a20_disabled
+
+a20_enabled:
 	call print_a20_is_enabled	
 	call print_newline
 	jmp a20_fi
@@ -49,6 +51,8 @@ a20_disabled:
 	call test_a20
 	cmpw $0x0, %ax
 	je a20_bios_failed
+
+a20_bios_success:
 	call print_success
 	call print_newline
 	jmp a20_fi
@@ -132,6 +136,81 @@ enable_a20_bios:
 	int $BIG_MEM_SRV_INT 
 
 	popw %bp
+	ret
+
+kbd_wait_cmd_ready:
+	in $0x64, %al
+	testb $0b10, %al
+	jnz kbd_wait_cmd_ready
+	
+	ret
+
+kbd_wait_data_ready:
+	in $0x64, %al
+	test $0b1, %al
+	jz kbd_wait_data_ready
+
+	ret
+
+kbd_cmd_enable:
+	call kbd_wait_cmd_ready
+	movb $0xAE, %al
+	out %al, $0x64
+
+kbd_cmd_disable:
+	call kbd_wait_cmd_ready
+	movb $0xAD, %al
+	out %al, $0x64
+	ret
+
+# "Asks" to read. Won't actually read data. To read data, call keyboard_data_read
+kbd_cmd_read:
+	call kbd_wait_cmd_ready
+	movb $0xD0, %al
+	out %al, $0x64
+	ret
+	
+kbd_cmd_write:
+	call kbd_wait_cmd_ready
+	movb 0xD1, %al
+	out %al, $0x64
+	ret
+
+# Reads data from keyboard and returns it into AL.
+kbd_data_read:
+	call kbd_wait_data_ready
+	in $0x60, %al
+	ret
+
+# Arguments:
+#	AL - Bytes to write to keyboard
+kbd_data_write:
+	pushw %ax
+	call kbd_wait_cmd_ready
+	popw %ax
+
+	out %al, $0x60
+	ret
+
+enable_a20_keyboard:
+	cli
+
+	call kbd_cmd_disable
+	call kbd_cmd_read
+	call kbd_data_read
+
+	or $0b10, %al
+	pushw %ax
+
+	call kbd_cmd_write
+	
+	popw %ax
+	call kbd_data_write
+	call kbd_cmd_enable
+	
+	call kbd_wait_cmd_ready
+
+	sti
 	ret
 
 # Arguments
