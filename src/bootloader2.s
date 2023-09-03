@@ -33,6 +33,8 @@
 .section .text
 	call detect_mem
 	call print_mem_detected
+	call print_testing_a20
+	call test_a20
 	call print_success
 	jmp hang
 
@@ -203,6 +205,86 @@ abort:
 	popw %bp
 	jmp hang
 
+print_newline:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $newline_str, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %si
+	popw %ds
+	popw %ax
+	popw %bp
+	ret
+
+print_testing_a20:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $testing_a20_str, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %si
+	popw %ds
+	popw %ax
+	popw %bp
+	ret
+
+print_a20_is_enabled:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $a20_is_enabled_str, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %si
+	popw %ds
+	popw %ax
+	popw %bp
+	ret
+
+print_a20_is_disabled:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $a20_is_disabled_str, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %si
+	popw %ds
+	popw %ax
+	popw %bp
+	ret
+
 # Arguments:
 #	No arguments
 print_bootloader2_loaded:
@@ -339,10 +421,18 @@ hang:
 	jmp hang
 
 .section .data
+newline_str:
+	.asciz "\n\r"
 bootloader2_loaded_str:
 	.asciz "Bootloader 2 loaded...\n\r"
 mem_detected_str:
 	.asciz "Memory detected...\n\r"
+testing_a20_str:
+	.asciz "Testing A20... "
+a20_is_enabled_str:
+	.asciz "A20 enabled!"
+a20_is_disabled_str:
+	.asciz "A20 disabled!"
 end_str:
 	.asciz "End of execution."	
 mem_map_error:
