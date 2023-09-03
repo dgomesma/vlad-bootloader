@@ -178,11 +178,12 @@ print_mem_detected:
 
 # Arguments:
 #	No arguments
-# Clobber:
-#	AX, BX, DS, SI
 print_error:
 	pushw %bp
 	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
 
 	movw $0x0, %ax
 	movw %ax, %ds
@@ -190,6 +191,9 @@ print_error:
 
 	call print
 
+	popw %si
+	popw %ds
+	popw %ax
 	popw %bp
 	ret
 	
