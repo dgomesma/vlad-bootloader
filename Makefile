@@ -20,7 +20,7 @@ img/hello-vlad.img:
 
 img/bootloader.img: bin/bootloader.bin
 	scripts/create-disk.sh $@
-	dd if=$< of=$@ bs=512 count=2 conv=notrunc
+	dd if=$< of=$@ bs=512 count=3 conv=notrunc
 
 bin/bootloader.bin: build/bootloader1.o build/bootloader2.o 
 	$(LD) -T ldscripts/bootloader.ld -o $@ $?
