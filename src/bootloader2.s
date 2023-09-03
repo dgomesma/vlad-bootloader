@@ -111,9 +111,12 @@ detect_mem_loop_exit:
 #	DS - Segment where error string is located
 #	SI - Offset where error string is located
 abort:
-	# Function preamble
 	pushw %bp
 	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
 
 	# Store arguments
 	sub $4, %sp
@@ -132,8 +135,9 @@ abort:
 	movw -2(%bp), %si
 	call print
 
-	# Restore stack frame
-	movw %bp, %sp
+	popw %si
+	popw %ds
+	popw %ax
 	popw %bp
 	jmp hang
 
