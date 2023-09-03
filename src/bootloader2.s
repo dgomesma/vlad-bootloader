@@ -216,8 +216,6 @@ print_success:
 
 # Arguments:
 #	No arguments
-# Clobber:
-#	AX, BX, DS, SI
 print_end:
 	pushw %bp
 	movw %sp, %bp
