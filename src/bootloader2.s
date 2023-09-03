@@ -44,6 +44,7 @@
 a20_disabled:
 	call print_a20_is_disabled
 	call print_newline
+	call enable_a20_bios
 	
 a20_fi:
 	call print_success
@@ -107,6 +108,18 @@ test_a20_exit:
 	popw %di
 	popw %ds
 	popw %es
+	popw %bp
+	ret
+
+# Could not find official documentation for that interrupt subfunction,
+# so I was not able to give 0x2401 accurate macro names.
+enable_a20_bios:
+	pushw %bp
+	movw %sp, %bp
+
+	movw $0x2401, %ax
+	int $BIG_MEM_SRV_INT 
+
 	popw %bp
 	ret
 
