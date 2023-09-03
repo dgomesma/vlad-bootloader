@@ -31,7 +31,6 @@
 	MEM_MAP_STRUCT_SIZE = 24		
 
 .section .text
-	call print_bootloader2_loaded
 	call detect_mem
 	call print_mem_detected
 	call print_success
@@ -45,6 +44,15 @@
 # Clobber:
 #	ES, DI, AX, BX, DX, CX
 detect_mem:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %es
+	pushw %di
+	pushw %bx
+	pushw %cx
+	pushw %dx
+
 detect_mem_loop_entry:
 	movl $MEM_MAP_BUF_PHYS_ADDR, mem_map_buf  
 	movb $0x0, mem_map_buf_n
@@ -90,6 +98,13 @@ detect_mem_abort:
 	call abort
 
 detect_mem_loop_exit:
+	popw %dx
+	popw %cx
+	popw %bx
+	popw %di
+	popw %es
+	popw %ax
+	popw %bp
 	ret
 
 # Arguments:
