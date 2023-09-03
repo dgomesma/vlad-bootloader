@@ -139,11 +139,13 @@ abort:
 
 # Arguments:
 #	No arguments
-# Clobber:
-#	AX, BX, DS, SI
 print_bootloader2_loaded:
 	pushw %bp
 	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
 	movw $0x0, %ax
 	movw %ax, %ds
 	movw $bootloader2_loaded_str, %ax
@@ -151,6 +153,9 @@ print_bootloader2_loaded:
 
 	call print
 
+	popw %si
+	popw %ds
+	popw %ax
 	popw %bp
 	ret
 
