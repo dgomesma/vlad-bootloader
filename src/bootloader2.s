@@ -52,7 +52,7 @@ a20_disabled:
 	cmpw $0x0, %ax
 	je a20_bios_failed
 
-a20_bios_success:
+a20_success:
 	call print_success
 	call print_newline
 	jmp a20_fi
@@ -60,6 +60,20 @@ a20_bios_success:
 a20_bios_failed:
 	call print_failed
 	call print_newline
+	call print_enable_a20_keyboard
+	call enable_a20_keyboard
+	call test_a20
+	cmp $0x0, %ax
+	je a20_keyboard_failed
+	jmp a20_success
+
+a20_keyboard_failed:
+	call print_failed
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $a20_enable_fatal_error, %ax
+	movw %ax, %si
+	call abort
 	
 a20_fi:
 	call print_success
@@ -292,14 +306,10 @@ abort:
 	pushw %bp
 	movw %sp, %bp
 	pushw %ax
-	pushw %ds
-	pushw %si
-
 
 	# Store arguments
-	sub $4, %sp
-	movw %ds, -4(%bp)
-	movw %si, -2(%bp)
+	pushw %ds
+	pushw %si
 
 	# Print error string prefix
 	movw $0x0, %ax
@@ -309,8 +319,8 @@ abort:
 	call print
 	
 	# Retrieve arguments
-	movw -4(%bp), %ds
-	movw -2(%bp), %si
+	popw %ds
+	popw %si
 	call print
 
 	popw %si
@@ -409,6 +419,26 @@ print_enable_a20_bios:
 	movw $0x0, %ax
 	movw %ax, %ds
 	movw $trying_a20_bios, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %si
+	popw %ds
+	popw %ax
+	popw %bp
+	ret
+
+print_enable_a20_keyboard:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $trying_a20_keyboard, %ax
 	movw %ax, %si
 
 	call print
@@ -588,6 +618,10 @@ a20_is_disabled_str:
 	.asciz "A20 disabled!"
 trying_a20_bios:
 	.asciz "Trying to enable A20 through BIOS... "
+trying_a20_keyboard:
+	.asciz "Trying to enable A20 through keyboard... "
+a20_enable_fatal_error:
+	.asciz "Unable to enable A20."
 end_str:
 	.asciz "End of execution."	
 mem_map_error:
