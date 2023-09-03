@@ -34,6 +34,68 @@
 	call detect_mem
 	call print_mem_detected
 	call print_success
+	jmp hang
+
+# Function:
+#	Verifies if A20 is enabled or not by verifying if
+#	memory-wrapping is enabled. If memory-wrapping is
+#	enabled, then A20 is disabled.
+# Arguments:
+#	No Arguments
+# Output:
+#	AX- 0 if disabled, 1 if enabled
+test_a20:
+	pushw %bp
+	movw %sp, %bp
+	pushw %es
+	pushw %ds
+	pushw %di
+	pushw %si
+	cli
+
+	# Setup es:di
+	xor %ax, %ax
+	movw %ax, %es
+	movw $0x0500, $di
+
+	# Setup ds:si
+	not %ax
+	movw %ax, %ds	
+	movw $0x0510, %si
+
+	# Save contents at es:di
+	movb %es:(%di), %al
+	pushw %ax
+
+	# Save contents at ds:si
+	movb %ds:(%si), %al
+	pushw %ax
+
+	# Verify if address wraps around
+	movb $0x00, %es:(%di)
+	movb $0xFF, %ds:(%si)
+	cmpb %es:(%di), $0xFF  
+
+	# Restore contents at ds:si
+	popw %ax
+	movb %al, %ds:(%si)
+
+	# Restore contents at es:di
+	popw %ax
+	movb %al, %es:(%di)
+
+	movw $0x0, %ax
+	je test_a20_exit
+	movw $0x1, %ax
+
+test_a20_exit:
+	sti
+	popw %si
+	popw %di
+	popw %ds
+	popw %es
+	popw %bp
+	ret
 
 # Arguments
 #	No arguments.
