@@ -48,6 +48,7 @@ prepare_stack:
 	movw %ax, %sp
 	movw $STACK_OFFSET, %ax
 	movw %ax, %ss
+	movw %sp, %bp
 
 jmp_to_bootloader2:
 	ljmp $0x0, $BOOTLD2_ADDR
