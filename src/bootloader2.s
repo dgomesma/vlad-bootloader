@@ -44,7 +44,18 @@
 a20_disabled:
 	call print_a20_is_disabled
 	call print_newline
+	call print_enable_a20_bios
 	call enable_a20_bios
+	call test_a20
+	cmpw $0x0, %ax
+	je a20_bios_failed
+	call print_success
+	call print_newline
+	jmp a20_fi
+
+a20_bios_failed:
+	call print_failed
+	call print_newline
 	
 a20_fi:
 	call print_success
@@ -309,6 +320,26 @@ print_a20_is_disabled:
 	popw %bp
 	ret
 
+print_enable_a20_bios:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $trying_a20_bios, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %si
+	popw %ds
+	popw %ax
+	popw %bp
+	ret
+
 # Arguments:
 #	No arguments
 print_bootloader2_loaded:
@@ -395,6 +426,25 @@ print_success:
 	popw %bp
 	ret
 
+print_failed:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $failed_str, %si
+
+	call print
+
+	popw %si
+	popw %ds
+	popw %ax
+	popw %bp
+	ret
+
 # Arguments:
 #	No arguments
 print_end:
@@ -457,12 +507,16 @@ a20_is_enabled_str:
 	.asciz "A20 enabled!"
 a20_is_disabled_str:
 	.asciz "A20 disabled!"
+trying_a20_bios:
+	.asciz "Trying to enable A20 through BIOS... "
 end_str:
 	.asciz "End of execution."	
 mem_map_error:
 	.asciz "Error detecting memory."
 success_str:
 	.asciz "Success!"
+failed_str:
+	.asciz "Failed!"
 error_str:
 	.asciz "Error!"
 error_prefix_str:
