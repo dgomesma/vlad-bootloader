@@ -230,11 +230,11 @@ print_end:
 # Arguments:
 #	DS - Segment where string is located
 #	SI - Offset where string is located
-# Clobber:
-#	AX, BX
 print:
-	push %bp
-	mov %sp, %bp
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %bx
 
 print_loop:
 	cld
@@ -247,6 +247,8 @@ print_loop:
 	jmp print_loop
 
 print_loop_exit:
+	popw %bx
+	popw %ax
 	pop %bp
 	ret
 
