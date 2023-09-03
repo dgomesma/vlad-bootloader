@@ -45,9 +45,9 @@ read_bootloader:
 
 prepare_stack:
 	movw $STACK_SEGMENT, %ax
-	movw %ax, %sp
-	movw $STACK_OFFSET, %ax
 	movw %ax, %ss
+	movw $STACK_OFFSET, %ax
+	movw %ax, %sp
 	movw %sp, %bp
 
 jmp_to_bootloader2:
