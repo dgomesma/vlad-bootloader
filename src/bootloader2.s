@@ -33,6 +33,7 @@
 .section .text
 	call print_bootloader2_loaded
 	call detect_mem
+	call print_mem_detected
 	call print_success
 
 # Arguments
@@ -138,6 +139,23 @@ print_bootloader2_loaded:
 	popw %bp
 	ret
 
+# Arguments
+#	No arguments
+# Clobber:
+#	AX, BX, DS, SI
+print_mem_detected:
+	pushw %bp
+	movw %sp, %bp
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $mem_detected_str, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %bp
+	ret
+
 # Arguments:
 #	No arguments
 # Clobber:
@@ -218,6 +236,8 @@ hang:
 .section .data
 bootloader2_loaded_str:
 	.asciz "Bootloader 2 loaded...\n\r"
+mem_detected_str:
+	.asciz "Memory detected...\n\r"
 end_str:
 	.asciz "End of execution."	
 mem_map_error:
