@@ -221,6 +221,9 @@ print_success:
 print_end:
 	pushw %bp
 	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
 
 	movw $0x0, %ax
 	movw %ax, %ds
@@ -228,6 +231,9 @@ print_end:
 
 	call print
 
+	popw %si
+	popw %ds
+	popw %ax
 	popw %bp
 	ret
 
