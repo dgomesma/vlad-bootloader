@@ -604,6 +604,8 @@ hang:
 	jmp hang
 
 .section .data
+
+## GDT Table Section
 .gdt_start:
 .gdt_null:
 	.double 0x0
@@ -632,6 +634,8 @@ hang:
 	.byte 0b10010010
 	.byte 0b11001111
 .gdt_end:
+
+## Strings
 newline_str:
 	.asciz "\n\r"
 bootloader2_loaded_str:
