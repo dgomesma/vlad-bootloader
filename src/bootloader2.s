@@ -604,6 +604,34 @@ hang:
 	jmp hang
 
 .section .data
+.gdt_start:
+.gdt_null:
+	.double 0x0
+	.double 0x0
+# Limit: Specifies size of segment
+# Base: Where segment begins in physical memory
+# P: Whether segment is present or not in physical memory
+# DPL: Descriptor Privilege Level, 0 to 3 ring prviligeses.
+# S: Whether a system segment (0) or code/data segment (1)
+# Type: Access permissions for segment. See section 3.4.5.1
+# G: Whether Limit refers to exact size (up to 1MB) if 0, or page sizes of 4KB if 1.
+# D: 16-bit segment (0) or 32-bit segment (1)
+# L: 64-bit code segment (if 1)
+
+.gdt_code:
+	.word 0xFFFF		# Limit 0-15
+	.word 0x0000		# Base 0-15
+	.byte 0x00		# Base 16-23
+	.byte 0b10011010	# Access Bytes: P(1) | DPL (2) | S(1) | Type (4)
+	.byte 0b11001111	# Flags & Limit: G (1) | D (1) | L (1) | Ignored | Limit 16-19
+	.byte 0x0
+.gdt_data:
+	.word 0xFFFF
+	.word 0x0000
+	.byte 0x00
+	.byte 0b10010010
+	.byte 0b11001111
+.gdt_end:
 newline_str:
 	.asciz "\n\r"
 bootloader2_loaded_str:
