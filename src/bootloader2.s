@@ -65,6 +65,8 @@ a20_bios_failed:
 	call test_a20
 	cmp $0x0, %ax
 	je a20_keyboard_failed
+	call print_success
+	call print_newline
 	jmp a20_success
 
 a20_keyboard_failed:
@@ -76,7 +78,10 @@ a20_keyboard_failed:
 	call abort
 	
 a20_fi:
-	call print_success
+	call print_loading_gdt
+	call load_gdt
+	call print_gdt_loaded
+	call print_newline
 	jmp hang
 
 load_gdt:
@@ -336,6 +341,46 @@ abort:
 	popw %ax
 	popw %bp
 	jmp hang
+
+print_gdt_loaded:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $gdt_loaded, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %si
+	popw %ds
+	popw %ax
+	popw %bp
+	ret
+
+print_loading_gdt:
+	pushw %bp
+	movw %sp, %bp
+	pushw %ax
+	pushw %ds
+	pushw %si
+
+	movw $0x0, %ax
+	movw %ax, %ds
+	movw $loading_gdt_table, %ax
+	movw %ax, %si
+
+	call print
+
+	popw %si
+	popw %ds
+	popw %ax
+	popw %bp
+	ret
 
 print_newline:
 	pushw %bp
@@ -664,6 +709,10 @@ trying_a20_keyboard:
 	.asciz "Trying to enable A20 through keyboard... "
 a20_enable_fatal_error:
 	.asciz "Unable to enable A20."
+loading_gdt_table:
+	.asciz "Loading GDT table... "
+gdt_loaded:
+	.asciz "GDT table loaded!"
 end_str:
 	.asciz "End of execution."	
 mem_map_error:
