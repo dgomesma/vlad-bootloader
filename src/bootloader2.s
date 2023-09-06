@@ -79,6 +79,14 @@ a20_fi:
 	call print_success
 	jmp hang
 
+load_gdt:
+	cli
+	
+	lgdt gdt_descriptor 	
+
+	sti
+	ret
+
 # Function:
 #	Verifies if A20 is enabled or not by verifying if
 #	memory-wrapping is enabled. If memory-wrapping is
@@ -606,8 +614,8 @@ hang:
 .section .data
 
 ## GDT Table Section
-.gdt_start:
-.gdt_null:
+gdt_start:
+gdt_null:
 	.double 0x0
 	.double 0x0
 # Limit: Specifies size of segment
@@ -620,21 +628,23 @@ hang:
 # D: 16-bit segment (0) or 32-bit segment (1)
 # L: 64-bit code segment (if 1)
 
-.gdt_code:
+gdt_code:
 	.word 0xFFFF		# Limit 0-15
 	.word 0x0000		# Base 0-15
 	.byte 0x00		# Base 16-23
 	.byte 0b10011010	# Access Bytes: P(1) | DPL (2) | S(1) | Type (4)
 	.byte 0b11001111	# Flags & Limit: G (1) | D (1) | L (1) | Ignored | Limit 16-19
 	.byte 0x0
-.gdt_data:
+gdt_data:
 	.word 0xFFFF
 	.word 0x0000
 	.byte 0x00
 	.byte 0b10010010
 	.byte 0b11001111
-.gdt_end:
-
+gdt_end:
+gdt_descriptor:
+	.word gdt_end - gdt_start - 1	
+	.long gdt_start
 ## Strings
 newline_str:
 	.asciz "\n\r"
