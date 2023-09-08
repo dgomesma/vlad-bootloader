@@ -35,7 +35,7 @@ read_bootloader:
 	
 	# Set interrupt
 	movb $DISK_READ_FN, %ah
-	movb $0x2, %al	# No. of Sectors
+	movb $0x3, %al	# No. of Sectors
 	movb $0x0, %ch	# Track Number
 	movb $0x2, %cl	# Sector Number
 	movb $0x0, %dh	# Head Number
